@@ -38,7 +38,7 @@ void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     Returns: Nothing. Void
     */
 
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba2.jpg";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba2.jpg";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage; colorImage = imread(imagePath);
     int rowsImageTwoInfo =0;
@@ -119,13 +119,66 @@ vector<string> createSecondImageArrayTrend(){
     return allTrends;
 }
 
-vector<string> createFirtImageSegments(){
+string selectSegmentsTrends(vector<vector<string>> &pImageOneInfo,int pSegment,int pImageRow){
+    const int segmentLimit = 192;
+    vector<string> lineSegment;
+    vector<int> colorCount;
+    cout<<"Psegment afuera: "<<pSegment<<endl;
+    for(;pSegment<pSegment+segmentLimit;pSegment++){
+        cout<<"pSegment: "<<pSegment<<endl;
+        lineSegment.push_back(pImageOneInfo[pImageRow][pSegment]);
+    }
+    
+    unordered_map<string,int> colorAppearence;
+    for(int pixelIndex = 0; pixelIndex<segmentLimit;pixelIndex++){
+        colorAppearence[lineSegment[pixelIndex]]++;
+    }
 
+    
+    for(auto& hashColor:colorAppearence){
+        colorCount.push_back(hashColor.second);
+    }
+    
+    int trendColor = colorCount[0];
+    int colorCountLength = colorCount.size();
+    for(int actualColor = 0;actualColor<colorCountLength-1;actualColor++){
+        if(trendColor<colorCount[actualColor]){
+            trendColor = colorCount[actualColor];
+        }
+    }
+    string finalTrend="";
+    for(auto& hashKey:colorAppearence){
+        if(hashKey.second == trendColor){
+            finalTrend = hashKey.first;
+            break;
+        }
+    }
+    return finalTrend;
+}
+
+
+vector<string> divideLinesBySegments(){
     /*
     Purpose: Create an array fulled with the trend colors from each segment of the first image.
     Parameters: Nothing
     Returns: The array of trend colors
     */
+    const int rows = 40,columns = 3840, segmentLimit=192;
+    vector<vector<string>> imageOneInfo( rows , vector<string> (columns));
+    uploadImageOneInfo(imageOneInfo);
+    vector<string> imageOneTrends;
+
+    for(int imageRows =0;imageRows<rows;imageRows++){
+        cout<<"Primer for DLBS"<<endl;
+        for(int segment=0;segment<columns;segment+=segmentLimit){
+            cout<<"Segundo for DLBS"<<endl;
+            string trendColor = selectSegmentsTrends(imageOneInfo,segment,imageRows);
+            cout<<"Nice"<<endl;
+            string trendInfo = trendColor + "|" + to_string(segment) + "|" + to_string(segment+segmentLimit) + "|" + to_string(imageRows);
+            imageOneTrends.push_back(trendInfo);    
+        }
+    }
+    return imageOneTrends;
     
 
 
@@ -133,11 +186,9 @@ vector<string> createFirtImageSegments(){
 
 
 void createDataStructure(){
-    //const int rows = 40 ; const int columns = 3840;
-    //vector<vector<string>> imageOneInfo( rows , vector<string> (columns));
-    //uploadImageOneInfo(imageOneInfo);
     cout<<"Iniciar el proceso"<<endl;
-    vector<string> allTrends = createSecondImageArrayTrend();
+    vector<string> imageOneTrends = divideLinesBySegments();
+    vector<string> imageTwoTrends = createSecondImageArrayTrend();
 
 }
 
