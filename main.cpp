@@ -6,7 +6,6 @@
 using namespace std;
 using namespace cv;
 
-
 void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     /*
     Purpose: Load the first image information and converts it to a matrix of colors for futures functionalities.
@@ -16,7 +15,8 @@ void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba1.png";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage; colorImage = imread(imagePath);
-    
+     int rowsImageOneInfo =0;
+
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
             redChannel = colorImage.at<Vec3b>(imageRows, imageColumns)[2];
@@ -24,13 +24,12 @@ void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
             blueChannel = colorImage.at<Vec3b>(imageRows, imageColumns)[0];
 
             string rgbValue = to_string(redChannel) +","+ to_string(greenChannel)  +","+ to_string(blueChannel);
-            pImageOneInfo[imageRows][imageColumns] = rgbValue;
+            pImageOneInfo[rowsImageOneInfo][imageColumns] = rgbValue;
             
         }
-       
+        rowsImageOneInfo++;
     }
 }
-
 
 void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     /*
@@ -39,10 +38,10 @@ void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     Returns: Nothing. Void
     */
 
-    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba2.jpg";
+    string imagePath = "C:/Users/Sebastian/Pictures/Prueba2.jpg";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage; colorImage = imread(imagePath);
-    
+    int rowsImageTwoInfo =0;
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
             redChannel = colorImage.at<Vec3b>(imageRows, imageColumns)[2];
@@ -50,10 +49,9 @@ void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
             blueChannel = colorImage.at<Vec3b>(imageRows, imageColumns)[0];
 
             string rgbValue = to_string(redChannel) +","+ to_string(greenChannel)  +","+ to_string(blueChannel);
-            pImageTwoInfo[imageRows][imageColumns] = rgbValue;
-            
+            pImageTwoInfo[rowsImageTwoInfo][imageColumns] = rgbValue;
         }
-        
+        rowsImageTwoInfo++;
     }
 }
 
@@ -62,12 +60,14 @@ void  selectTop3Trends(unordered_map<string, int> &colorAppearence,vector<int> &
 
         int trendColor = trendsPerLine[0];
         int vectorSize = trendsPerLine.size();
-
+        int removeElement= 0;
         for(int actualColor = 0;actualColor < vectorSize-1;actualColor++){
-            if(trendsPerLine[actualColor] < trendsPerLine[actualColor+1]){
+            if(trendColor < trendsPerLine[actualColor]){
                 trendColor = trendsPerLine[actualColor];
+                removeElement = actualColor;
             }
         }
+        trendsPerLine.erase(trendsPerLine.begin()+removeElement);
 
         unordered_map<string, int>:: iterator hashColor;
         string topTrend;
@@ -87,16 +87,15 @@ void  selectTop3Trends(unordered_map<string, int> &colorAppearence,vector<int> &
 vector<string> createSecondImageArrayTrend(){
 
     /*
-    Purpose: Create an array fulled with the trend colors from each 54 lines.
+    Purpose: Create an array fulled with the trend colors from each 54 lines of the second image.
     Parameters: Nothing
-    Returns: Pointer to the first value of the array.
+    Returns: The array of trend colors.
     */
 
-    const int rows = 40 ; const int columns = 3840; const int minimumCutoutSize = 108;
+    const int rows = 40 , columns = 3840;
 
-    vector<vector<string>> imageTwoInfo( columns , vector<string> (rows));
+    vector<vector<string>> imageTwoInfo( rows , vector<string> (columns));
     uploadImageTwoInfo(imageTwoInfo);
-    cout<<"Segunda imagen cargada"<<endl;
     vector<string> allTrends;
     vector<int> trendsPerLine;
     vector<string> top3TrendsPerLine;
@@ -104,7 +103,6 @@ vector<string> createSecondImageArrayTrend(){
     for(int lines = 0;lines<rows;lines++){
         unordered_map<string, int> colorAppearence;
         string actualColor;
-
         for(int colors = 0;colors<columns;colors++){
             actualColor = imageTwoInfo[lines][colors];
             colorAppearence[actualColor]++;
@@ -112,18 +110,24 @@ vector<string> createSecondImageArrayTrend(){
         unordered_map<string, int>:: iterator hashColor;
         for (hashColor = colorAppearence.begin(); hashColor != colorAppearence.end(); hashColor++){
             trendsPerLine.push_back(hashColor->second);
+            
         }
-        cout<<"Seleccionando top tres: "<<endl;
         selectTop3Trends(colorAppearence,trendsPerLine,allTrends);
-        
-        cout<<"Las 120 tendencias: "<<endl;
-        for(int x=0;x<120;x++){
-            cout<<"Trend: "<<allTrends[x]<<endl;
-
-        }
+        trendsPerLine.clear();
 
     }
     return allTrends;
+}
+
+vector<string> createFirtImageSegments(){
+
+    /*
+    Purpose: Create an array fulled with the trend colors from each segment of the first image.
+    Parameters: Nothing
+    Returns: The array of trend colors
+    */
+    
+
 
 }
 
@@ -136,10 +140,6 @@ void createDataStructure(){
     vector<string> allTrends = createSecondImageArrayTrend();
 
 }
-
-
-
-
 
 int main() {
     createDataStructure();
