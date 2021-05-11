@@ -6,6 +6,7 @@
 using namespace std;
 using namespace cv;
 
+
 void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     /*
     Purpose: Load the first image information and converts it to a matrix of colors for futures functionalities.
@@ -169,12 +170,46 @@ vector<string> divideLinesBySegments(){
             string trendInfo = trendColor + "|" + to_string(segment) + "|" + to_string(segment+segmentLimit) + "|" + to_string(imageRows);
             imageOneTrends.push_back(trendInfo);
         }
-        break;
     }
     return imageOneTrends;
     
 
 
+}
+
+
+vector<int> trendColorToInt(string pTrends){
+    string delimiter = ",";
+    vector<int> rgbValues;
+    while ((pTrends.find(delimiter)) != string::npos) {
+        rgbValues.push_back(stoi(pTrends.substr(0, pTrends.find(delimiter))));
+        pTrends.erase(0, pTrends.find(delimiter) + delimiter.length());
+    } rgbValues.push_back(stoi(pTrends.substr(0, pTrends.find(delimiter))));
+    return rgbValues;
+}
+
+void matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageTwoTrendsVector){
+    vector<string> matchTrendVector;
+    for(int imageOneIndex = 0; imageOneIndex<pImageOneTrendsVector.size(); imageOneIndex++){
+        string trend = pImageOneTrendsVector[imageOneIndex];
+        string trendColor = trend.substr(0, trend.find("|"));
+        vector<int> imageOneTrend = trendColorToInt(trendColor);
+        
+
+        for(int imageTwoIndex = 0; imageTwoIndex<pImageTwoTrendsVector.size(); imageTwoIndex++){
+            vector<int> imageTwoTrend = trendColorToInt(pImageTwoTrendsVector[imageTwoIndex]);
+            bool compareRedValue = (-2 < imageOneTrend[0]-imageTwoTrend[0]) && (2>imageOneTrend[0]-imageTwoTrend[0]); 
+            bool compareGreenValue = (-2 < imageOneTrend[1]-imageTwoTrend[1]) && (2>imageOneTrend[1]-imageTwoTrend[1]);
+            bool compareBlueValue = (-2 < imageOneTrend[2]-imageTwoTrend[2]) && (2>imageOneTrend[2]-imageTwoTrend[2]);
+            //cout<<"Primera imagen: "<< imageOneTrend[0]<< "," << imageOneTrend[1]<<"," << imageOneTrend[2]<<" Segunda imagen: " << imageTwoTrend[0]<< "," << imageTwoTrend[1]<<"," << imageTwoTrend[2]<<endl;
+            if(compareRedValue && compareGreenValue && compareBlueValue){
+                matchTrendVector.push_back(pImageTwoTrendsVector[imageTwoIndex]  + trend.substr(trend.find("|"), trend.length()-1));
+                //cout<<"Vector: "<<matchTrendVector[matchTrendVector.size()-1]<<endl<<endl;
+                break;
+            }
+
+        }
+    } cout<<matchTrendVector.size()<<endl;
 }
 
 void createDataStructure(){
@@ -183,6 +218,7 @@ void createDataStructure(){
     cout<<"Primera imagen cargada"<<endl;
     vector<string> imageTwoTrends = createSecondImageArrayTrend();
     cout<<"Segunda imagen cargada"<<endl;
+    matchTrends(imageOneTrends, imageTwoTrends);
 }
 
 int main() {
