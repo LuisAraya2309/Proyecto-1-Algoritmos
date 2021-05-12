@@ -4,19 +4,53 @@
 #include <unordered_map>
 #include <map>
 #include <filesystem>
+#include <stdlib.h>
 
 using namespace std;
 using namespace cv;
 
+bool existsImage(Mat pColorImage){
+    /*
+    Purpose: 
+        -Verify if an image exists or not.
+    Paramateres: 
+        -Recieves a Mat type variable, with the selected image.
+    Returns: 
+        -True or false, it depends if the image was found or not.
+    */
+    try{
+        int rowsValue = pColorImage.rows;
+        if(rowsValue > 0){
+            cout<<"The image was found successfully"<<endl;
+            return true;
+        } 
+        else{
+            throw(rowsValue);
+        }
+            
+    }
+    catch(int pRowsValue){
+        cout<<"The image does not exist, the size should be 3840x2160 but it is "<<pRowsValue<<"x"<<pRowsValue<<endl;
+        return false;
+    }
+}
+
 void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     /*
-    Purpose: Load the first image information and converts it to a matrix of colors for futures functionalities.
-    Paramateres: Recieves an empty matrix who is going to be filled with RGB colors.
-    Returns: Nothing. Void
+    Purpose: 
+        -Load the first image information and converts it to a matrix of colors for futures functionalities.
+    Paramateres: 
+        -Recieves an empty matrix who is going to be filled with RGB colors.
+    Returns: 
+        -Nothing. Void
     */
+    
     string imagePath = "C:/Users/Sebastian/Pictures/Prueba5.png";
-    int blueChannel; int greenChannel; int redChannel;
     Mat colorImage = imread(imagePath);
+    if(!existsImage(colorImage)){
+        exit(1);
+    }
+    int blueChannel; int greenChannel; int redChannel;
     int rowsImageOneInfo =0;
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
@@ -34,14 +68,20 @@ void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
 
 void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     /*
-    Purpose: Load the second image information and converts it to a matrix of colors for futures functionalities.
-    Paramateres: Recieves an empty matrix who is going to be filled with RGB colors.
-    Returns: Nothing. Void
+    Purpose:
+        -Load the second image information and converts it to a matrix of colors for futures functionalities.
+    Paramateres: 
+        -Recieves an empty matrix who is going to be filled with RGB colors.
+    Returns:
+        -Nothing. Void
     */
 
     string imagePath = "C:/Users/Sebastian/Pictures/Prueba6.png";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage = imread(imagePath);
+    if(!existsImage(colorImage)){
+        exit(1);
+    }
     int rowsImageTwoInfo =0;
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
@@ -56,40 +96,52 @@ void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     }
 }
 
-void  selectTop3Trends(unordered_map<string, int> &colorAppearence,vector<int> &trendsPerLine,vector<string> &allTrends){
+void  selectTop3Trends(unordered_map<string, int> &pColorAppearence,vector<int> &pTrendsPerLine,vector<string> &pAllTrends){
+    /*
+    Purpose: 
+        -Select the top three trends in a line of the second image.
+    Paramateres: 
+        -Recieves a empty strings vector (pAllTrends)
+        -A interger vector with all the color values of the line (pTrendsPerLine) 
+        -A hash with all the appearences of a color. 
+    Returns: 
+        -No return value. Void
+    */
     for(int trend = 0 ;trend < 3;trend++){
 
-        int trendColor = trendsPerLine[0];
-        size_t vectorSize = trendsPerLine.size();
+        int trendColor = pTrendsPerLine[0];
+        size_t vectorSize = pTrendsPerLine.size();
         int removeElement= 0;
         for(int actualColor = 0;actualColor < vectorSize-1;actualColor++){
-            if(trendColor < trendsPerLine[actualColor]){
-                trendColor = trendsPerLine[actualColor];
+            if(trendColor < pTrendsPerLine[actualColor]){
+                trendColor = pTrendsPerLine[actualColor];
                 removeElement = actualColor;
             }
         }
-        trendsPerLine.erase(trendsPerLine.begin()+removeElement);
+        pTrendsPerLine.erase(pTrendsPerLine.begin()+removeElement);
 
         unordered_map<string, int>:: iterator hashColor;
         string topTrend;
-        for(hashColor = colorAppearence.begin(); hashColor != colorAppearence.end(); hashColor++){
+        for(hashColor = pColorAppearence.begin(); hashColor != pColorAppearence.end(); hashColor++){
             if(hashColor->second == trendColor){
                 topTrend = hashColor->first;
                 break;
             }
         }
-        colorAppearence.erase(topTrend);
-        allTrends.push_back(topTrend);
+        pColorAppearence.erase(topTrend);
+        pAllTrends.push_back(topTrend);
 
     }
 }
 
 vector<string> createSecondImageArrayTrend(){
-
     /*
-    Purpose: Create an array fulled with the trend colors from each 54 lines of the second image.
-    Parameters: Nothing
-    Returns: The array of trend colors.
+    Purpose: 
+        -Create an array fulled with the trend colors from each 54 lines of the second image.
+    Parameters: 
+        -No parameters
+    Returns: 
+        -The array of trend colors.
     */
 
     const int rows = 40 , columns = 3840;
@@ -120,13 +172,25 @@ vector<string> createSecondImageArrayTrend(){
 }
 
 string selectSegmentsTrends(vector<vector<string>> &pImageOneInfo,int pSegment,int pImageRow){
+    /*
+    Purpose: 
+        -Analize and select the trend of a specific segment.
+    Paramateres: 
+        -A matrix with all the color values about ImageOne
+        -An interger that specify the position of the segment 
+        -An interger that specify the row position of the segment.
+    Returns: 
+        -A string variable with the segment trend.
+    */
+
     const int segmentLimit = 192;
     vector<string> lineSegment;
     vector<int> colorCount;
+
     for(int startSegment = pSegment; startSegment < pSegment + segmentLimit;startSegment++){
         lineSegment.push_back(pImageOneInfo[pImageRow][startSegment]);
-
     }
+
     unordered_map<string,int> colorAppearence;
     for(int pixelIndex = 0; pixelIndex<segmentLimit;pixelIndex++){
         colorAppearence[lineSegment[pixelIndex]]++;
@@ -143,7 +207,7 @@ string selectSegmentsTrends(vector<vector<string>> &pImageOneInfo,int pSegment,i
             trendColor = colorCount[actualColor];
         }
     }
-    string finalTrend="";
+    string finalTrend = "";
     for(auto& hashKey:colorAppearence){
         if(hashKey.second == trendColor){
             finalTrend = hashKey.first;
@@ -155,9 +219,12 @@ string selectSegmentsTrends(vector<vector<string>> &pImageOneInfo,int pSegment,i
 
 vector<string> divideLinesBySegments(){
     /*
-    Purpose: Create an array fulled with the trend colors from each segment of the first image.
-    Parameters: Nothing
-    Returns: The array of trend colors
+    Purpose:
+        -Create an array fulled with the trend colors from each segment of the first image.
+    Parameters: 
+        -Nothing
+    Returns:
+        -The array of trend colors
     */
     const int rows = 40,columns = 3840, segmentLimit=192;
     vector<vector<string>> imageOneInfo( rows , vector<string> (columns));
@@ -178,20 +245,48 @@ vector<string> divideLinesBySegments(){
 }
 
 vector<int> trendColorToInt(string pTrends){
+    /*
+    Purpose:
+        -Convert the trend color value (red,green,blue) to intergers, and store it in a vector.
+    Parameters: 
+        -A string with the color values of the trend. 
+    Returns:
+        -A vector that stores the three color values with the RGB order.
+    */
+
     string delimiter = ",";
     vector<int> rgbValues;
+
     while ((pTrends.find(delimiter)) != string::npos) {
         rgbValues.push_back(stoi(pTrends.substr(0, pTrends.find(delimiter))));
         pTrends.erase(0, pTrends.find(delimiter) + delimiter.length());
-    } rgbValues.push_back(stoi(pTrends.substr(0, pTrends.find(delimiter))));
+    }
+    rgbValues.push_back(stoi(pTrends.substr(0, pTrends.find(delimiter))));
+
     return rgbValues;
 }
 
 string returnColor(string pFullInfo){
+     /*
+    Purpose:
+        -Return the color trend.
+    Parameters: 
+        -A string with all the information of a posible match.
+    Returns:
+        -A string with only the color trend at the continue order: redValue,greenValue,blueVale.
+    */
     return pFullInfo.substr(0,pFullInfo.find("|"));
 }
 
 vector<int> returnPositions(string pFullInfo){
+    /*
+    Purpose: 
+        - Convert the position information into a interger and return it.
+    Parameters: 
+        - A string with all the ingormation about the matched segement.
+    Returns: 
+        - An interger vector that stores the begin , end and row position of the segment.
+    */
     vector<int> positionValues;
     string allPositionValues = pFullInfo.substr(pFullInfo.find("|")+1, pFullInfo.size()-1);
     for(int positionInfoRequired = 0; positionInfoRequired<3;positionInfoRequired++){
@@ -203,6 +298,14 @@ vector<int> returnPositions(string pFullInfo){
 }
 
 vector<int> joinPositionalInfo(vector<int> pPositionValues){
+    /*
+    Purpose: 
+        - Add the position information to a vector.
+    Parameters:
+        -  An empty vector.
+    Returns:
+        - A vector that stores the values ​​of the segment position.
+    */
     vector<int> positionalInfo;
     positionalInfo.push_back(pPositionValues[0]);
     positionalInfo.push_back(pPositionValues[1]);
@@ -212,6 +315,14 @@ vector<int> joinPositionalInfo(vector<int> pPositionValues){
 }
 
 vector<string> matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageTwoTrendsVector){
+     /*
+    Purpose: 
+        - Analyze the matches between the trends in the first image and the trend sampling in the second image.
+    Parameters: 
+        - Two string vectors that contain the information of the trends of the image one and two respectively.
+    Returns:
+        - A vector that stores all the segments information whose trends matched.
+    */
     vector<string> matchTrendVector;
     for(int imageOneIndex = 0; imageOneIndex<pImageOneTrendsVector.size(); imageOneIndex++){
         string trend = pImageOneTrendsVector[imageOneIndex];
@@ -224,44 +335,45 @@ vector<string> matchTrends(vector<string> &pImageOneTrendsVector , vector<string
             bool compareRedValue = (-2 <= imageOneTrend[0]-imageTwoTrend[0]) && (2>=imageOneTrend[0]-imageTwoTrend[0]); 
             bool compareGreenValue = (-2 <=  imageOneTrend[1]-imageTwoTrend[1]) && (2>=imageOneTrend[1]-imageTwoTrend[1]);
             bool compareBlueValue = (-2 <= imageOneTrend[2]-imageTwoTrend[2]) && (2>=imageOneTrend[2]-imageTwoTrend[2]);
-            //cout<<"Primera imagen: "<< imageOneTrend[0]<< "," << imageOneTrend[1]<<"," << imageOneTrend[2]<<" Segunda imagen: " << imageTwoTrend[0]<< "," << imageTwoTrend[1]<<"," << imageTwoTrend[2]<<endl;
+            
             if(compareRedValue && compareGreenValue && compareBlueValue){
                 matchTrendVector.push_back(pImageTwoTrendsVector[imageTwoIndex]  + trend.substr(trend.find("|"), trend.length()-1));
-                //cout<<"Vector: "<<matchTrendVector[matchTrendVector.size()-1]<<endl<<endl;
                 break;
             }
 
         }
     }
-    /*
-    cout<<matchTrendVector.size()<<endl;
-    for(size_t i=0;i<matchTrendVector.size();i++){
-        cout<<"Trend: "<<matchTrendVector[i]<<endl;
-    }
-    */
     return matchTrendVector;
 }
 
 multimap<string,vector<int>> createDataStructure(){
-    cout<<"Iniciar el proceso"<<endl;
+     /*
+    Purpose: 
+        - Create the data structure of the program, the structure is a hash , who store the color values of the trend,
+        the begin and end of the segment where the trend matched and the row position of the segement.
+    Parameters: 
+        - Nothing
+    Returns:
+        - A multimap hash with all the information of the matched segment.
+    */
+
+    cout<<"-------System startup-------"<<endl;
     vector<string> imageOneTrends = divideLinesBySegments();
-    cout<<"Primera imagen cargada"<<endl;
+    cout<<"First image uploaded successfully"<<endl;
     vector<string> imageTwoTrends = createSecondImageArrayTrend();
-    cout<<"Segunda imagen cargada"<<endl;
+    cout<<"Second image uploaded successfully"<<endl;
     vector<string> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
 
     multimap <string,vector<int>> dataStructure;
 
     for(size_t trendInfo = 0;trendInfo<matchedTrends.size();trendInfo++){
         string trendColor;
-        cout<<"Antes de la llamada a la funcion"<<endl;
         vector<int> positionValues = returnPositions(matchedTrends[trendInfo]);
         trendColor = returnColor(matchedTrends[trendInfo]);
         vector<int> positionInfo = joinPositionalInfo(positionValues);
         dataStructure.emplace(trendColor,positionInfo);
-        cout<<"Trend Color: "<<trendColor<<" , BP: "<<positionValues[0]<<" ,EP: "<<positionValues[1]<<" ,VP: "<<positionValues[2]<<endl;
     }
-    cout<<"Estructura de datos finalizada con exito"<<endl;
+    cout<<"Data structure created successfully"<<endl;
     return dataStructure;
 }
 
