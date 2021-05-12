@@ -2,6 +2,7 @@
 #include<opencv2/highgui/highgui.hpp>
 #include<vector>
 #include <unordered_map>
+#include <map>
 
 using namespace std;
 using namespace cv;
@@ -13,7 +14,7 @@ void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     Paramateres: Recieves an empty matrix who is going to be filled with RGB colors.
     Returns: Nothing. Void
     */
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba1.png";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba1.png";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage; colorImage = imread(imagePath);
      int rowsImageOneInfo =0;
@@ -39,7 +40,7 @@ void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     Returns: Nothing. Void
     */
 
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba2.jpg";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba2.jpg";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage; colorImage = imread(imagePath);
     int rowsImageTwoInfo =0;
@@ -60,7 +61,7 @@ void  selectTop3Trends(unordered_map<string, int> &colorAppearence,vector<int> &
     for(int trend = 0 ;trend < 3;trend++){
 
         int trendColor = trendsPerLine[0];
-        int vectorSize = trendsPerLine.size();
+        size_t vectorSize = trendsPerLine.size();
         int removeElement= 0;
         for(int actualColor = 0;actualColor < vectorSize-1;actualColor++){
             if(trendColor < trendsPerLine[actualColor]){
@@ -137,7 +138,7 @@ string selectSegmentsTrends(vector<vector<string>> &pImageOneInfo,int pSegment,i
     }
 
     int trendColor = colorCount[0];
-    int colorCountLength = colorCount.size();
+    size_t colorCountLength = colorCount.size();
     for(int actualColor = 0;actualColor<colorCountLength-1;actualColor++){
         if(trendColor<colorCount[actualColor]){
             trendColor = colorCount[actualColor];
@@ -167,7 +168,7 @@ vector<string> divideLinesBySegments(){
     for(int imageRows =0;imageRows<rows;imageRows++){
         for(int segment=0;segment<columns;segment+=segmentLimit){
             string trendColor = selectSegmentsTrends(imageOneInfo,segment,imageRows);
-            string trendInfo = trendColor + "|" + to_string(segment) + "|" + to_string(segment+segmentLimit) + "|" + to_string(imageRows);
+            string trendInfo = trendColor + "|" + to_string(segment) + "|" + to_string(segment+segmentLimit) + "|" + to_string(imageRows*54);
             imageOneTrends.push_back(trendInfo);
         }
     }
@@ -188,7 +189,36 @@ vector<int> trendColorToInt(string pTrends){
     return rgbValues;
 }
 
-void matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageTwoTrendsVector){
+//  R,G,B|xi|xf|y
+
+string returnColor(string fullInfo){
+    return fullInfo.substr(0,fullInfo.find("|"));
+}
+
+int returnRequiredPosition(string fullInfo,int requiredPosition){
+    for(int data = 0; data<=requiredPosition;data++){
+        fullInfo = fullInfo.substr(fullInfo.find("|"),fullInfo.length()-1);
+        if(data==3){
+            return stoi(fullInfo);
+        }   
+    }
+
+    return stoi(fullInfo.substr(0,fullInfo.find("|")));
+
+}
+
+vector<int> joinPositionalInfo(int beginPosition,int endPosition, int verticalPosition){
+    vector<int> positionalInfo;
+    positionalInfo.push_back(beginPosition);
+    positionalInfo.push_back(endPosition);
+    positionalInfo.push_back(verticalPosition);
+
+    return positionalInfo;
+}
+
+
+
+vector<string> matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageTwoTrendsVector){
     vector<string> matchTrendVector;
     for(int imageOneIndex = 0; imageOneIndex<pImageOneTrendsVector.size(); imageOneIndex++){
         string trend = pImageOneTrendsVector[imageOneIndex];
@@ -198,9 +228,9 @@ void matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageT
 
         for(int imageTwoIndex = 0; imageTwoIndex<pImageTwoTrendsVector.size(); imageTwoIndex++){
             vector<int> imageTwoTrend = trendColorToInt(pImageTwoTrendsVector[imageTwoIndex]);
-            bool compareRedValue = (-2 < imageOneTrend[0]-imageTwoTrend[0]) && (2>imageOneTrend[0]-imageTwoTrend[0]); 
-            bool compareGreenValue = (-2 < imageOneTrend[1]-imageTwoTrend[1]) && (2>imageOneTrend[1]-imageTwoTrend[1]);
-            bool compareBlueValue = (-2 < imageOneTrend[2]-imageTwoTrend[2]) && (2>imageOneTrend[2]-imageTwoTrend[2]);
+            bool compareRedValue = (-2 <= imageOneTrend[0]-imageTwoTrend[0]) && (2>=imageOneTrend[0]-imageTwoTrend[0]); 
+            bool compareGreenValue = (-2 <=  imageOneTrend[1]-imageTwoTrend[1]) && (2>=imageOneTrend[1]-imageTwoTrend[1]);
+            bool compareBlueValue = (-2 <= imageOneTrend[2]-imageTwoTrend[2]) && (2>=imageOneTrend[2]-imageTwoTrend[2]);
             //cout<<"Primera imagen: "<< imageOneTrend[0]<< "," << imageOneTrend[1]<<"," << imageOneTrend[2]<<" Segunda imagen: " << imageTwoTrend[0]<< "," << imageTwoTrend[1]<<"," << imageTwoTrend[2]<<endl;
             if(compareRedValue && compareGreenValue && compareBlueValue){
                 matchTrendVector.push_back(pImageTwoTrendsVector[imageTwoIndex]  + trend.substr(trend.find("|"), trend.length()-1));
@@ -209,20 +239,43 @@ void matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageT
             }
 
         }
-    } cout<<matchTrendVector.size()<<endl;
+    }
+    /*
+    cout<<matchTrendVector.size()<<endl;
+    for(size_t i=0;i<matchTrendVector.size();i++){
+        cout<<"Trend: "<<matchTrendVector[i]<<endl;
+    }
+    */
+    return matchTrendVector;
 }
 
-void createDataStructure(){
+multimap<string,vector<int>> createDataStructure(){
     cout<<"Iniciar el proceso"<<endl;
     vector<string> imageOneTrends = divideLinesBySegments();
     cout<<"Primera imagen cargada"<<endl;
     vector<string> imageTwoTrends = createSecondImageArrayTrend();
     cout<<"Segunda imagen cargada"<<endl;
-    matchTrends(imageOneTrends, imageTwoTrends);
+    vector<string> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
+
+    multimap <string,vector<int>> dataStructure;
+
+    for(size_t trendInfo = 0;trendInfo<matchedTrends.size();trendInfo++){
+        int beginPosition, endPosition, verticalPosition;
+        string trendColor;
+
+        trendColor = returnColor(matchedTrends[trendInfo]);
+        beginPosition = returnRequiredPosition(matchedTrends[trendInfo],0);
+        endPosition= returnRequiredPosition(matchedTrends[trendInfo],1);    
+        verticalPosition= returnRequiredPosition(matchedTrends[trendInfo],2);  
+        vector<int> positionInfo;
+        dataStructure.emplace(trendColor,positionInfo);
+        //cout<<"Trend Color: "<<trendColor<<" , BP: "<<beginPosition<<" ,EP: "<<endPosition<<" ,VP: "<<verticalPosition<<endl;
+    }
+    return dataStructure;
 }
 
 int main() {
-    createDataStructure();
-
+    multimap<string,vector<int>> dataStructureN = createDataStructure();
+    cout<<"Size of N: "<<sizeof(dataStructureN);
     return 0;
 }
