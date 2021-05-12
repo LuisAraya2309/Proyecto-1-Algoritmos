@@ -1,12 +1,12 @@
-#include<iostream>
-#include<opencv2/highgui/highgui.hpp>
-#include<vector>
+#include <iostream>
+#include <opencv2/highgui/highgui.hpp>
+#include <vector>
 #include <unordered_map>
 #include <map>
+#include <filesystem>
 
 using namespace std;
 using namespace cv;
-
 
 void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     /*
@@ -14,11 +14,10 @@ void uploadImageOneInfo(vector<vector<string>> &pImageOneInfo){
     Paramateres: Recieves an empty matrix who is going to be filled with RGB colors.
     Returns: Nothing. Void
     */
-    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba1.png";
+    string imagePath = "C:/Users/Sebastian/Pictures/Prueba5.png";
     int blueChannel; int greenChannel; int redChannel;
-    Mat colorImage; colorImage = imread(imagePath);
-     int rowsImageOneInfo =0;
-
+    Mat colorImage = imread(imagePath);
+    int rowsImageOneInfo =0;
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
             redChannel = colorImage.at<Vec3b>(imageRows, imageColumns)[2];
@@ -40,9 +39,9 @@ void uploadImageTwoInfo(vector<vector<string>> &pImageTwoInfo){
     Returns: Nothing. Void
     */
 
-    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba2.jpg";
+    string imagePath = "C:/Users/Sebastian/Pictures/Prueba6.png";
     int blueChannel; int greenChannel; int redChannel;
-    Mat colorImage; colorImage = imread(imagePath);
+    Mat colorImage = imread(imagePath);
     int rowsImageTwoInfo =0;
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
@@ -178,7 +177,6 @@ vector<string> divideLinesBySegments(){
 
 }
 
-
 vector<int> trendColorToInt(string pTrends){
     string delimiter = ",";
     vector<int> rgbValues;
@@ -189,34 +187,29 @@ vector<int> trendColorToInt(string pTrends){
     return rgbValues;
 }
 
-//  R,G,B|xi|xf|y
-
-string returnColor(string fullInfo){
-    return fullInfo.substr(0,fullInfo.find("|"));
+string returnColor(string pFullInfo){
+    return pFullInfo.substr(0,pFullInfo.find("|"));
 }
 
-int returnRequiredPosition(string fullInfo,int requiredPosition){
-    for(int data = 0; data<=requiredPosition;data++){
-        fullInfo = fullInfo.substr(fullInfo.find("|"),fullInfo.length()-1);
-        if(data==3){
-            return stoi(fullInfo);
-        }   
+vector<int> returnPositions(string pFullInfo){
+    vector<int> positionValues;
+    string allPositionValues = pFullInfo.substr(pFullInfo.find("|")+1, pFullInfo.size()-1);
+    for(int positionInfoRequired = 0; positionInfoRequired<3;positionInfoRequired++){
+        positionValues.push_back(stoi(allPositionValues.substr(0,allPositionValues.find("|"))));
+        allPositionValues.erase(0,allPositionValues.find("|")+1);
     }
-
-    return stoi(fullInfo.substr(0,fullInfo.find("|")));
-
+    positionValues.push_back(stoi(allPositionValues.substr(0,allPositionValues.find("|"))));
+    return positionValues;
 }
 
-vector<int> joinPositionalInfo(int beginPosition,int endPosition, int verticalPosition){
+vector<int> joinPositionalInfo(vector<int> pPositionValues){
     vector<int> positionalInfo;
-    positionalInfo.push_back(beginPosition);
-    positionalInfo.push_back(endPosition);
-    positionalInfo.push_back(verticalPosition);
+    positionalInfo.push_back(pPositionValues[0]);
+    positionalInfo.push_back(pPositionValues[1]);
+    positionalInfo.push_back(pPositionValues[2]);
 
     return positionalInfo;
 }
-
-
 
 vector<string> matchTrends(vector<string> &pImageOneTrendsVector , vector<string> &pImageTwoTrendsVector){
     vector<string> matchTrendVector;
@@ -260,17 +253,15 @@ multimap<string,vector<int>> createDataStructure(){
     multimap <string,vector<int>> dataStructure;
 
     for(size_t trendInfo = 0;trendInfo<matchedTrends.size();trendInfo++){
-        int beginPosition, endPosition, verticalPosition;
         string trendColor;
-
+        cout<<"Antes de la llamada a la funcion"<<endl;
+        vector<int> positionValues = returnPositions(matchedTrends[trendInfo]);
         trendColor = returnColor(matchedTrends[trendInfo]);
-        beginPosition = returnRequiredPosition(matchedTrends[trendInfo],0);
-        endPosition= returnRequiredPosition(matchedTrends[trendInfo],1);    
-        verticalPosition= returnRequiredPosition(matchedTrends[trendInfo],2);  
-        vector<int> positionInfo;
+        vector<int> positionInfo = joinPositionalInfo(positionValues);
         dataStructure.emplace(trendColor,positionInfo);
-        //cout<<"Trend Color: "<<trendColor<<" , BP: "<<beginPosition<<" ,EP: "<<endPosition<<" ,VP: "<<verticalPosition<<endl;
+        cout<<"Trend Color: "<<trendColor<<" , BP: "<<positionValues[0]<<" ,EP: "<<positionValues[1]<<" ,VP: "<<positionValues[2]<<endl;
     }
+    cout<<"Estructura de datos finalizada con exito"<<endl;
     return dataStructure;
 }
 
