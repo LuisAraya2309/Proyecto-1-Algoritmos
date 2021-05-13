@@ -16,7 +16,7 @@ using namespace std;
 
 int BacktrakingAlgorithm(vector<MatchInfo> pMatchesVector){
     const size_t pMatchesVectorLenght = pMatchesVector.size();
-    int clippingsFound;
+    int clippingsFound = 0;
     for(int pMatchesVectorIndex = 0; pMatchesVectorIndex<pMatchesVectorLenght; pMatchesVectorIndex++){
 
     }

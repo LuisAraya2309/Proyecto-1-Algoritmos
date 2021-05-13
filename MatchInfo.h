@@ -29,6 +29,16 @@ class MatchInfo{
 
         }
 
+        void printMatchInfo(){
+            cout<<"Tendencia: "<<endl;
+            segmentTrend.printPixel();
+            cout<<"Segment colors"<<endl;
+            for(int segmentColorIndex = 0; segmentColorIndex < 192 ; segmentColorIndex++){
+                segmentColors[segmentColorIndex].printPixelSegment();
+            }
+            cout<<endl<<"Begin of the segment: "<<begin<<" ,End of the segment: "<<end<<" ,Row position of the segment: "<<rowPosition<<endl;
+        }
+
         // Setter
 
         void setSegmentTrend( Pixel pSegmentTrend) {
