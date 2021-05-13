@@ -1,5 +1,4 @@
 
-
 class Pixel{
     //Atributes
     int redValue, greenValue,blueValue;
@@ -21,6 +20,33 @@ class Pixel{
             this->blueValue = pBlueGreen;
 
         }
-    
+
+        //Setter
+
+        void setRed( int pRed) {
+        redValue= pRed;
+        }
+
+        void setGreen( int pGreen) {
+        greenValue = pGreen;
+        }
+
+        void setBlue( int pBlue) {
+        blueValue = pBlue;
+        }
+
+        // Getter
+
+        int getRed() {
+        return redValue;
+        }
+
+        int getGreen(){
+            return greenValue;
+        }
+
+        int getBlue(){
+            return blueValue;
+        }
 
 };

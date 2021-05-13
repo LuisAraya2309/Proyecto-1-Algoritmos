@@ -3,8 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
-#include "Pixel.h"
-//#include <filesystem>
+#include "MatchInfo.h"
 #include <stdlib.h>
 
 using namespace std;
@@ -174,7 +173,30 @@ vector<Pixel> createSecondImageArrayTrend(){
     return allTrends;
 }
 
-Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int pImageRow){
+vector<int> returnColorTrend(string pTrendColor){
+    vector<int> colorValue;
+    const int numberOfColors = 3;
+    for(int searchColorInfo = 0; searchColorInfo<numberOfColors-1;searchColorInfo++){
+        colorValue.push_back(stoi(pTrendColor.substr(0,pTrendColor.find(","))));
+        pTrendColor.erase(0,pTrendColor.find(","));
+    }
+    colorValue.push_back(stoi(pTrendColor.substr(0,-1)));
+    return colorValue;
+}
+
+Pixel returnSpecificPixel(vector<vector<Pixel>> &pImageOneInfo, string pFinalTrend,int pSegment,int pImageRow, const int pSegmentLimit){
+    vector<int> colorValue = returnColorTrend(pFinalTrend);
+    for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit;startSegment++){
+        bool compareRedValue = (pImageOneInfo[pImageRow][startSegment].getRed() ==  colorValue[0]);
+        bool compareGreenValue = (pImageOneInfo[pImageRow][startSegment].getGreen() == colorValue[1]);
+        bool compareBlueValue = (pImageOneInfo[pImageRow][startSegment].getBlue() == colorValue[2]);
+        if(compareRedValue && compareGreenValue && compareBlueValue){
+            return pImageOneInfo[pImageRow][startSegment];
+        }
+    }
+}
+
+Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int pImageRow, const int pSegmentLimit){
     /*
     Purpose: 
         -Analize and select the trend of a specific segment.
@@ -182,20 +204,22 @@ Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int
         -A matrix with all the color values about ImageOne
         -An interger that specify the position of the segment 
         -An interger that specify the row position of the segment.
+        -An interger with the leght of the segment.
     Returns: 
-        -A string variable with the segment trend.
+        -A Pixel with the segment trend.
     */
 
-    const int segmentLimit = 192;
-    vector<Pixel> lineSegment;
+    vector<string> lineSegment;
     vector<int> colorCount;
+    string colorValue;
 
-    for(int startSegment = pSegment; startSegment < pSegment + segmentLimit;startSegment++){
-        lineSegment.push_back(pImageOneInfo[pImageRow][startSegment]);
+    for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit;startSegment++){
+        colorValue = to_string(pImageOneInfo[pImageRow][startSegment].getRed())+ "," + to_string(pImageOneInfo[pImageRow][startSegment].getGreen()) + "," + to_string(pImageOneInfo[pImageRow][startSegment].getBlue());
+        lineSegment.push_back(colorValue);
     }
 
-    unordered_map<Pixel,int> colorAppearence;
-    for(int pixelIndex = 0; pixelIndex<segmentLimit;pixelIndex++){
+    unordered_map<string,int> colorAppearence;
+    for(int pixelIndex = 0; pixelIndex < pSegmentLimit;pixelIndex++){
         colorAppearence[lineSegment[pixelIndex]]++;
     }
 
@@ -211,68 +235,73 @@ Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int
         }
     }
 
-    Pixel finalTrend = Pixel();
+    string finalTrend;
     for(auto& hashKey:colorAppearence){
         if(hashKey.second == trendColor){
             finalTrend = hashKey.first;
             break;
         }
     }
-    return finalTrend;
+    Pixel trendColorValue = returnSpecificPixel(pImageOneInfo, finalTrend ,pSegment, pImageRow, pSegmentLimit);
+    return trendColorValue;
 }
 
-vector<Pixel> divideLinesBySegments(){
+vector<Pixel> returnSpecificSegment(vector<vector<Pixel>> &pImageOneInfo, int pSegment, int pImageRow, const int pSegmentLimit){
+    vector<Pixel> specificSegment;
+    for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit; startSegment++){
+        specificSegment.push_back(pImageOneInfo[pImageRow][startSegment]);
+    }
+    return specificSegment;
+}
+
+vector<MatchInfo> divideLinesBySegments(){
     /*
     Purpose:
         -Create an array fulled with the trend colors from each segment of the first image.
     Parameters: 
-        -Nothing
+        -Nothing.
     Returns:
-        -The array of trend colors
+        -An array of trend colors.
     */
     const int rows = 40,columns = 3840, segmentLimit=192;
     vector<vector<Pixel>> imageOneInfo( rows , vector<Pixel> (columns));
     uploadImageOneInfo(imageOneInfo);
-    vector<Pixel> imageOneTrends;
+    vector<MatchInfo> imageOneTrends;
 
     for(int imageRows =0;imageRows<rows;imageRows++){
         for(int segment=0;segment<columns;segment+=segmentLimit){
-            Pixel trendColor = selectSegmentsTrends(imageOneInfo,segment,imageRows);
-            imageOneTrends.push_back(trendColor);
+            Pixel trendColor = selectSegmentsTrends(imageOneInfo,segment,imageRows, segmentLimit);
+            vector<Pixel> specificSegment = returnSpecificSegment(imageOneInfo,segment,imageRows,segmentLimit);
+            MatchInfo totalInfo = MatchInfo(trendColor,specificSegment,segment, segment+segmentLimit, imageRows*54);
+            imageOneTrends.push_back(totalInfo);
         }
     }
     return imageOneTrends;
     
-
-
 }
 
-
-
-vector<Pixel> matchTrends(vector<Pixel> &pImageOneTrendsVector , vector<Pixel> &pImageTwoTrendsVector){
-     /*
+vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<Pixel> &pImageTwoTrendsVector){
+    /*
     Purpose: 
         - Analyze the matches between the trends in the first image and the trend sampling in the second image.
     Parameters: 
-        - Two string vectors that contain the information of the trends of the image one and two respectively.
+        - Two vectors one of Pixels and other of MatchInfo that contain the information of the trends of the image one and two respectively.
     Returns:
         - A vector that stores all the segments information whose trends matched.
     */
-    vector<Pixel> matchTrendVector;
-    for(int imageOneIndex = 0; imageOneIndex<pImageOneTrendsVector.size(); imageOneIndex++){
-        Pixel trend = pImageOneTrendsVector[imageOneIndex];
-        string trendColor = trend.substr(0, trend.find("|"));
-        vector<int> imageOneTrend = trendColorToInt(trendColor);
-        
 
-        for(int imageTwoIndex = 0; imageTwoIndex<pImageTwoTrendsVector.size(); imageTwoIndex++){
-            vector<int> imageTwoTrend = trendColorToInt(pImageTwoTrendsVector[imageTwoIndex]);
-            bool compareRedValue = (-2 <= imageOneTrend[0]-imageTwoTrend[0]) && (2>=imageOneTrend[0]-imageTwoTrend[0]); 
-            bool compareGreenValue = (-2 <=  imageOneTrend[1]-imageTwoTrend[1]) && (2>=imageOneTrend[1]-imageTwoTrend[1]);
-            bool compareBlueValue = (-2 <= imageOneTrend[2]-imageTwoTrend[2]) && (2>=imageOneTrend[2]-imageTwoTrend[2]);
+    vector<MatchInfo> matchTrendVector;
+    for(int imageOneIndex = 0; imageOneIndex<pImageOneTrendsVector.size(); imageOneIndex++){
+        
+        for(int imageTwoIndex = 0; imageTwoIndex < pImageTwoTrendsVector.size(); imageTwoIndex++){
+
+            bool compareRedValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getRed()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getRed()); 
+            bool compareGreenValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getGreen()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getGreen());
+            bool compareBlueValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getBlue()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getBlue());
             
             if(compareRedValue && compareGreenValue && compareBlueValue){
-                matchTrendVector.push_back(pImageTwoTrendsVector[imageTwoIndex]  + trend.substr(trend.find("|"), trend.length()-1));
+                pImageOneTrendsVector[imageOneIndex].setSegmentTrend(pImageTwoTrendsVector[imageTwoIndex]);
+                matchTrendVector.push_back(pImageOneTrendsVector[imageOneIndex]);
                 break;
             }
 
@@ -281,33 +310,24 @@ vector<Pixel> matchTrends(vector<Pixel> &pImageOneTrendsVector , vector<Pixel> &
     return matchTrendVector;
 }
 
-multimap<string,vector<int>> createDataStructure(){
+vector<MatchInfo> createDataStructure(){
      /*
     Purpose: 
-        - Create the data structure of the program, the structure is a multimap  , who stores the color values of the trend,
-        the begin and end of the segment where the trend matched and the row position of the segement.
+        - Create the data structure of the program, the structure is a vector of MatchInfo , the pixels of the entire segment, 
+        who stores the color values of the trend, the begin and end of the segment where the trend matched and
+        the row position of the segement.
     Parameters: 
         - Nothing
     Returns:
-        - A multimap hash with all the information of the matched segment.
+        - A vector of MatchInfo with all the information of the matched segments.
     */
 
     cout<<"-------System startup-------"<<endl;
-    vector<Pixel> imageOneTrends = divideLinesBySegments();
+    vector<MatchInfo> imageOneTrends = divideLinesBySegments();
     cout<<"First image uploaded successfully"<<endl;
     vector<Pixel> imageTwoTrends = createSecondImageArrayTrend();
     cout<<"Second image uploaded successfully"<<endl;
-    vector<Pixel> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
-
-    multimap <string,vector<int>> dataStructure;
-
-    for(size_t trendInfo = 0;trendInfo<matchedTrends.size();trendInfo++){
-        string trendColor;
-        vector<int> positionValues = returnPositions(matchedTrends[trendInfo]);
-        trendColor = returnColor(matchedTrends[trendInfo]);
-        vector<int> positionInfo = joinPositionalInfo(positionValues);
-        dataStructure.emplace(trendColor,positionInfo);
-    }
+    vector<MatchInfo> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
     cout<<"Data structure created successfully"<<endl;
-    return dataStructure;
+    return matchedTrends;
 }
