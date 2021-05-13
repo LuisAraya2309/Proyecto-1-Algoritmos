@@ -100,7 +100,7 @@ void uploadImageTwoInfo(vector<vector<Pixel>> &pImageTwoInfo){
     }
 }
 
-void  selectTop3Trends(unordered_map<Pixel, int> &pColorAppearence,vector<int> &pTrendsPerLine,vector<Pixel> &pAllTrends){
+void  selectTop3Trends(vector<Pixel> &pPixels,vector<int> &pPixelAppearence,vector<int> &pTrendsPerLine,vector<Pixel> &pAllTrends){
     /*
     Purpose: 
         -Select the top three trends in a line of the second image.
@@ -125,17 +125,36 @@ void  selectTop3Trends(unordered_map<Pixel, int> &pColorAppearence,vector<int> &
         pTrendsPerLine.erase(pTrendsPerLine.begin()+removeElement);
 
         Pixel topTrend = Pixel();
-        for(auto& hashColor : pColorAppearence){
-            if(hashColor.second == trendColor){
-                topTrend = hashColor.first;
+        for(int pixel = 0; pixel< pPixelAppearence.size();pixel++){
+            if(pPixelAppearence[pixel] == trendColor){
+                topTrend = pPixels[pixel];
+                removeElement = pixel;
                 break;
             }
         }
-        pColorAppearence.erase(topTrend);
+        pPixels.erase(pPixels.begin() + removeElement);
         pAllTrends.push_back(topTrend);
 
     }
 }
+
+int getElementPosition(vector<Pixel> &pixels, Pixel &searchElement){
+
+    size_t pixelsLength = pixels.size();
+    for(int iteratePixels = 0; iteratePixels<pixelsLength;iteratePixels++){
+        Pixel actualPixel = Pixel();
+        actualPixel= pixels[iteratePixels];
+        bool isRedEqual = actualPixel.getRed() == searchElement.getRed(); 
+        bool isBlueEqual =  actualPixel.getBlue() == searchElement.getBlue();
+        bool isGreenEqual =  actualPixel.getGreen() == searchElement.getGreen();
+        if((isRedEqual)&&(isBlueEqual)&&(isGreenEqual)){
+            return iteratePixels;
+        }
+    }
+    return -1;    
+
+}
+
 
 vector<Pixel> createSecondImageArrayTrend(){
     /*
@@ -156,19 +175,28 @@ vector<Pixel> createSecondImageArrayTrend(){
     vector<Pixel> top3TrendsPerLine;
     
     for(int lines = 0;lines<rows;lines++){
-        unordered_map<Pixel, int> colorAppearence;
+
+        vector<Pixel> pixels;
+        vector<int> pixelAppearence;
         Pixel actualColor = Pixel();
         for(int colors = 0;colors<columns;colors++){
             actualColor = imageTwoInfo[lines][colors];
-            colorAppearence[actualColor]++;
-        }
-        for (auto& hashColor: colorAppearence){
-            trendsPerLine.push_back(hashColor.second);
+            int addPosition = getElementPosition(pixels,actualColor);
+            if(addPosition!=-1){
+                pixelAppearence[addPosition]++;
+                continue;
+            }
+            pixels.push_back(actualColor);
+            pixelAppearence[pixels.size()-1]=1;
             
         }
-        selectTop3Trends(colorAppearence,trendsPerLine,allTrends);
-        trendsPerLine.clear();
 
+        for (int countedPixel = 0;countedPixel<pixelAppearence.size();countedPixel++){
+            trendsPerLine.push_back(pixelAppearence[countedPixel]);
+            
+        }
+        selectTop3Trends( pixels, pixelAppearence,trendsPerLine,allTrends);
+        trendsPerLine.clear();
     }
     return allTrends;
 }
@@ -209,41 +237,45 @@ Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int
         -A Pixel with the segment trend.
     */
 
-    vector<string> lineSegment;
-    vector<int> colorCount;
-    string colorValue;
+    vector<Pixel> lineSegment;
+    vector<Pixel> pixels;
+    vector<int> pixelAppearence;
+
+
 
     for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit;startSegment++){
-        colorValue = to_string(pImageOneInfo[pImageRow][startSegment].getRed())+ "," + to_string(pImageOneInfo[pImageRow][startSegment].getGreen()) + "," + to_string(pImageOneInfo[pImageRow][startSegment].getBlue());
-        lineSegment.push_back(colorValue);
+        lineSegment.push_back(pImageOneInfo[pImageRow][startSegment]);
     }
 
-    unordered_map<string,int> colorAppearence;
+    Pixel actualColor = Pixel();
     for(int pixelIndex = 0; pixelIndex < pSegmentLimit;pixelIndex++){
-        colorAppearence[lineSegment[pixelIndex]]++;
+        actualColor = lineSegment[pixelIndex];
+        int addPosition = getElementPosition(pixels,actualColor);
+        if(addPosition!=-1){
+            pixelAppearence[addPosition]++;
+            continue;
+        }
+        pixels.push_back(actualColor);
+        pixelAppearence[pixels.size()-1]=1;
     }
 
-    for(auto& hashColor:colorAppearence){
-        colorCount.push_back(hashColor.second);
-    }
 
-    int trendColor = colorCount[0];
-    size_t colorCountLength = colorCount.size();
-    for(int actualColor = 0;actualColor<colorCountLength-1;actualColor++){
-        if(trendColor<colorCount[actualColor]){
-            trendColor = colorCount[actualColor];
+    int trendColor = pixelAppearence[0];
+    size_t pixelAppearenceLength = pixelAppearence.size();
+    for(int actualColor = 0;actualColor<pixelAppearenceLength-1;actualColor++){
+        if(trendColor<pixelAppearence[actualColor]){
+            trendColor = pixelAppearence[actualColor];
         }
     }
 
-    string finalTrend;
-    for(auto& hashKey:colorAppearence){
-        if(hashKey.second == trendColor){
-            finalTrend = hashKey.first;
+    Pixel finalTrend = Pixel();
+    for(int pixelTimes = 0; pixelTimes<pixelAppearenceLength;pixelTimes++){
+        if(pixelAppearence[pixelTimes] == trendColor){
+            finalTrend = pixels[pixelTimes];
             break;
         }
     }
-    Pixel trendColorValue = returnSpecificPixel(pImageOneInfo, finalTrend ,pSegment, pImageRow, pSegmentLimit);
-    return trendColorValue;
+    return finalTrend;
 }
 
 vector<Pixel> returnSpecificSegment(vector<vector<Pixel>> &pImageOneInfo, int pSegment, int pImageRow, const int pSegmentLimit){
