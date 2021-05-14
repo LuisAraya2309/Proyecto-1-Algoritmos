@@ -45,7 +45,7 @@ void uploadImageOneInfo(vector<vector<Pixel>> &pImageOneInfo){
         -Nothing. Void
     */
     
-    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba1.png";
+    string imagePath = "C:/Users/Sebastian/Pictures/Prueba1.png";
     Mat colorImage = imread(imagePath);
     if(existsImage(colorImage)){
         int blueChannel; int greenChannel; int redChannel;
@@ -80,7 +80,7 @@ void uploadImageTwoInfo(vector<vector<Pixel>> &pImageTwoInfo){
         -Nothing. Void
     */
 
-    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba2.jpg";
+    string imagePath = "C:/Users/Sebastian/Pictures/Prueba2.jpg";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage = imread(imagePath);
     if(!existsImage(colorImage)){
@@ -186,7 +186,7 @@ vector<Trend> createSecondImageArrayTrend(){
                 continue;
             }
             pixels.push_back(actualColor);
-            pixelAppearence[pixels.size()-1]=1;
+            pixelAppearence.push_back(1);
             
         }
 
@@ -198,29 +198,6 @@ vector<Trend> createSecondImageArrayTrend(){
         trendsPerLine.clear();
     }
     return allTrends;
-}
-
-vector<int> returnColorTrend(string pTrendColor){
-    vector<int> colorValue;
-    const int numberOfColors = 3;
-    for(int searchColorInfo = 0; searchColorInfo<numberOfColors-1;searchColorInfo++){
-        colorValue.push_back(stoi(pTrendColor.substr(0,pTrendColor.find(","))));
-        pTrendColor.erase(0,pTrendColor.find(","));
-    }
-    colorValue.push_back(stoi(pTrendColor.substr(0,-1)));
-    return colorValue;
-}
-
-Pixel returnSpecificPixel(vector<vector<Pixel>> &pImageOneInfo, string pFinalTrend,int pSegment,int pImageRow, const int pSegmentLimit){
-    vector<int> colorValue = returnColorTrend(pFinalTrend);
-    for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit;startSegment++){
-        bool compareRedValue = (pImageOneInfo[pImageRow][startSegment].getRed() ==  colorValue[0]);
-        bool compareGreenValue = (pImageOneInfo[pImageRow][startSegment].getGreen() == colorValue[1]);
-        bool compareBlueValue = (pImageOneInfo[pImageRow][startSegment].getBlue() == colorValue[2]);
-        if(compareRedValue && compareGreenValue && compareBlueValue){
-            return pImageOneInfo[pImageRow][startSegment];
-        }
-    }
 }
 
 Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int pImageRow, const int pSegmentLimit){
@@ -236,28 +213,25 @@ Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int
         -A Pixel with the segment trend.
     */
 
-    vector<Pixel> lineSegment;
-    vector<Pixel> pixels;
+    vector<Pixel> lineSegment, pixels;
     vector<int> pixelAppearence;
-
-
 
     for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit;startSegment++){
         lineSegment.push_back(pImageOneInfo[pImageRow][startSegment]);
     }
 
     Pixel actualColor = Pixel();
+    int addPosition;
     for(int pixelIndex = 0; pixelIndex < pSegmentLimit;pixelIndex++){
         actualColor = lineSegment[pixelIndex];
-        int addPosition = getElementPosition(pixels,actualColor);
+        addPosition = getElementPosition(pixels,actualColor);
         if(addPosition!=-1){
             pixelAppearence[addPosition]++;
             continue;
         }
         pixels.push_back(actualColor);
-        pixelAppearence[pixels.size()-1]=1;
+        pixelAppearence.push_back(1);
     }
-
 
     int trendColor = pixelAppearence[0];
     size_t pixelAppearenceLength = pixelAppearence.size();
@@ -341,6 +315,13 @@ vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<
     return matchTrendVector;
 }
 
+void printDataStructure(vector<MatchInfo> &pDataStructure){
+    const size_t dataStructureLenght = pDataStructure.size();
+    for(int dataStructureIndex = 0; dataStructureIndex < dataStructureLenght; dataStructureIndex++){
+        pDataStructure[dataStructureIndex].printMatchInfo();
+    }
+}
+
 vector<MatchInfo> createDataStructure(){
      /*
     Purpose: 
@@ -360,5 +341,6 @@ vector<MatchInfo> createDataStructure(){
     cout<<"Second image uploaded successfully"<<endl;
     vector<MatchInfo> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
     cout<<"Data structure created successfully"<<endl;
+    printDataStructure(matchedTrends);
     return matchedTrends;
 }

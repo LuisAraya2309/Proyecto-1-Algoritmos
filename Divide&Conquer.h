@@ -35,7 +35,7 @@ int divideAndConquer(vector<MatchInfo> &pDataStructureN){
         }
         
     }
-    return divideAndConquer() // + Conquer(dividenInfo,);
+    return divideAndConquer(); // + Conquer(dividenInfo,);
 
 }
 

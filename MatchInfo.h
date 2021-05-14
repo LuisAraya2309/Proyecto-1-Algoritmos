@@ -1,4 +1,4 @@
-#include "Pixel.h"
+#include "Trend.h"
 #include <vector>
 using namespace std;
 
@@ -6,7 +6,7 @@ class MatchInfo{
 
     //Atributes
     
-    Pixel segmentTrend;
+    Trend segmentTrend;
     vector<Pixel> segmentColors;
     int begin, end, rowPosition;
 
@@ -20,7 +20,7 @@ class MatchInfo{
         }
 
 
-        MatchInfo(Pixel pSegmentTrend ,vector<Pixel> pSegmentColors ,int pBegin ,int pEnd ,int pRowPosition){
+        MatchInfo(Trend pSegmentTrend ,vector<Pixel> pSegmentColors ,int pBegin ,int pEnd ,int pRowPosition){
             this->segmentTrend = pSegmentTrend;
             this->segmentColors = pSegmentColors;
             this->rowPosition = pRowPosition;
@@ -29,9 +29,18 @@ class MatchInfo{
 
         }
 
+        void printMatchInfo(){
+            segmentTrend.printTrend();
+            cout<<"Segment colors"<<endl;
+            for(int segmentColorIndex = 0; segmentColorIndex < 192 ; segmentColorIndex++){
+                segmentColors[segmentColorIndex].printPixelSegment();
+            }
+            cout<<endl<<"Begin of the segment: "<<begin<<" ,End of the segment: "<<end<<" ,Row position of the segment: "<<rowPosition<<endl<<endl;
+        }
+
         // Setter
 
-        void setSegmentTrend( Pixel pSegmentTrend) {
+        void setSegmentTrend( Trend pSegmentTrend) {
         segmentTrend = pSegmentTrend;
         }
 
@@ -53,7 +62,7 @@ class MatchInfo{
 
         // Getter
 
-        Pixel getSegmentTrend() {
+        Trend getSegmentTrend() {
         return segmentTrend;
         }
 
