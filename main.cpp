@@ -6,9 +6,15 @@
 
 int main() {
     vector<MatchInfo> dataStructureN = createDataStructure();
-    cout<<"Size of N: "<<sizeof(dataStructureN);
-    cout<<"MIERDA DE DIVE AND CONQUER: "<<endl;
+    cout<<"-----------Lista dataStructureN-----------"<<endl;
+    for(int i = 0; i<dataStructureN.size()-1; i++){
+        dataStructureN[i].printMatchInfo();
+    }
+    cout<<"Size of N: "<<sizeof(dataStructureN)<<endl;
     cout<<endl;
-    int hola = divideAndConquer(dataStructureN);
+    vector<MatchInfo> finalCuts;
+    int contador = 0;
+    int hola = divideAndConquer(dataStructureN, finalCuts, contador);
+    cout<<"Recortes encontrados por el Divide&Conquer: "<<hola<<endl;
     return 0;
 }

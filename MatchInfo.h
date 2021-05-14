@@ -38,7 +38,7 @@ class MatchInfo{
                 segmentColors[segmentColorIndex].printPixelSegment();
             }
             */
-            cout<<endl<<"Begin of the segment: "<<begin<<" ,End of the segment: "<<end<<" ,Row position of the segment: "<<rowPosition<<endl<<endl;
+            cout<<"Begin of the segment: "<<begin<<" ,End of the segment: "<<end<<" ,Row position of the segment: "<<rowPosition<<endl<<endl;
         }
 
         // Setter
