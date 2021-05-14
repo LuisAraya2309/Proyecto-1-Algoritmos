@@ -6,14 +6,13 @@
 
 int main() {
     vector<MatchInfo> dataStructureN = createDataStructure();
-    cout<<"-----------Lista dataStructureN-----------"<<endl;
-    for(int i = 0; i<dataStructureN.size()-1; i++){
-        dataStructureN[i].printMatchInfo();
+    if(dataStructureN.empty()){
+        cout<<"The image has no matches"<<endl;
+    }else{
+        vector<MatchInfo> finalCuts;
+        size_t foundClipplings = divideAndConquer(dataStructureN, finalCuts);
+        cout<<"Recortes encontrados por el Divide&Conquer: "<< foundClipplings <<endl;
     }
-    cout<<"Size of N: "<<sizeof(dataStructureN)<<endl;
-    cout<<endl;
-    vector<MatchInfo> finalCuts;
-    int hola = divideAndConquer(dataStructureN, finalCuts);
-    cout<<"Recortes encontrados por el Divide&Conquer: "<<hola<<endl;
+    
     return 0;
 }

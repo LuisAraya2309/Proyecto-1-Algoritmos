@@ -55,12 +55,6 @@ vector<MatchInfo> eraseDuplicatedColumnCuts(vector<MatchInfo> &pDividedInfo){
     Returns:
         A MatchInfo vector cleaned from duplicated cuts
     */
-    cout<<"-----------Lista Entrante-----------"<<endl;
-    for(int i = 0; i<pDividedInfo.size(); i++){
-        pDividedInfo[i].printMatchInfo();
-    }
-    cout<<"Cantidad de recortes antes de evaluar:"<<pDividedInfo.size()<<endl;
-
     vector<MatchInfo> finalCuts;
     size_t dividedInfoLenght = pDividedInfo.size()-1;
     int dividedInfoIndex = 0 , indexCompareRows= 1;
@@ -87,10 +81,6 @@ vector<MatchInfo> eraseDuplicatedColumnCuts(vector<MatchInfo> &pDividedInfo){
             }
         }
     }
-    cout<<"-----------Lista Resultante-----------"<<endl;
-    for(int i = 0; i<finalCuts.size(); i++){
-        finalCuts[i].printMatchInfo();
-    }
     return finalCuts;
 }
 
@@ -103,11 +93,35 @@ int conquer(vector<MatchInfo> &pFinalCuts){
         -The data structure, a vector with the final cuts that is going to be used in the recursion
     Returns:
         -An integer with the amount of the definitive matches.
+    
+    vector<MatchInfo> compareCuts; 
+    int  pFinalCutsIndex = 0, IndexCompareTrends = 1 ,pFinalCutsLenght = pFinalCuts.size()-1;
+    bool redCondition, greenCondition, blueCondition;
+    while(pFinalCutsIndex < pFinalCutsLenght){
+        redCondition =  10 >= abs(pFinalCuts[pFinalCutsIndex].getSegmentTrend().getTrend().getRed() - pFinalCuts[IndexCompareTrends].getSegmentTrend().getTrend().getRed());
+        greenCondition =  10 >= abs(pFinalCuts[pFinalCutsIndex].getSegmentTrend().getTrend().getGreen() - pFinalCuts[IndexCompareTrends].getSegmentTrend().getTrend().getGreen());
+        blueCondition =  10 >= abs(pFinalCuts[pFinalCutsIndex].getSegmentTrend().getTrend().getBlue() - pFinalCuts[IndexCompareTrends].getSegmentTrend().getTrend().getBlue());
+        if(redCondition && greenCondition && blueCondition){
+            //Comparo si sus segmentos tienen similitudes.
+            if(Si eran parecidos){
+                compareCuts.push_back(pFinalCuts[pFinalCutsIndex]);
+                compareCuts.push_back(pFinalCuts[IndexCompareTrends]);
+                pFinalCutsIndex++;
+            }else{
+                if(IndexCompareTrends >= pFinalCutsLenght){
+                    pFinalCutsIndex++;
+                }
+                IndexCompareTrends++;
+            }
+        }else{
+            pFinalCutsIndex++;
+        }
+    }
     */
-    return pFinalCuts.size();
+   return 0;
 }
 
-int divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFinalCuts){
+size_t divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFinalCuts){
      /*
     Purpose:
         -Selects a pivot which is going to be always the first element of the dataStructure. Then it begins to divide the data structure by the begin and end  pivot's value. 
@@ -119,7 +133,7 @@ int divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFin
     */
 
     if(pDataStructureN.size()<=1){
-        return conquer(eraseDuplicatedColumnCuts(pFinalCuts));
+        return eraseDuplicatedColumnCuts(pFinalCuts).size();
     }
     
     vector<MatchInfo> dividedInfo;
@@ -132,17 +146,12 @@ int divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFin
 
         MatchInfo sample = pDataStructureN[actualInfo];
         int sampleBegin = sample.getBegin(), sampleEnd = sample.getEnd();
-        //cout<<"Se evlauan: "<<pivot.getRowPosition()<<" contra "<<sample.getRowPosition()<<endl;
-        //cout<<"Condicion: "<<pivotBegin<<" == "<<sampleBegin<<" and "<<pivotEnd<<" == "<<sampleEnd<<endl;
         if(pivotBegin == sampleBegin && pivotEnd == sampleEnd){
-            //cout<<"Se ingresa a dividedInfo para ser evaluado"<<endl;
             dividedInfo.push_back(sample);
         }else{
-            //cout<<"Se ingresa a pInfoToEvaluate"<<endl;
             pInfoToEvaluate.push_back(sample);
         }
     }
-    //cout<<"Termino la busqueda, crea la lista: "<<endl;
     pDataStructureN = pInfoToEvaluate;
     eraseDuplicatedRowCuts(dividedInfo, pFinalCuts);
     return divideAndConquer(pDataStructureN , pFinalCuts) ;

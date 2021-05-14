@@ -140,6 +140,16 @@ void  selectTop3Trends(vector<Pixel> &pPixels,vector<int> &pPixelAppearence,vect
 
 int getElementPosition(vector<Pixel> &pixels, Pixel &searchElement){
 
+    /*
+    Purpose: 
+        - Return the position of an specific Pixel
+    Parameters: 
+        - A vector of pixels.
+        - The pixel to find.
+    Returns:
+        - An interger with the index of this Pixel in the vector
+    */
+
     size_t pixelsLength = pixels.size();
     for(int iteratePixels = 0; iteratePixels<pixelsLength;iteratePixels++){
         Pixel actualPixel = Pixel();
@@ -252,6 +262,16 @@ Pixel selectSegmentsTrends(vector<vector<Pixel>> &pImageOneInfo,int pSegment,int
 }
 
 vector<Pixel> returnSpecificSegment(vector<vector<Pixel>> &pImageOneInfo, int pSegment, int pImageRow, const int pSegmentLimit){
+    /*
+    Purpose: 
+        - Return a specific segment using the begin, end and row position.
+    Parameters: 
+        - A matrix with all the information about the first image.
+        - Three intergers with the value of begin, end and row position of the segment
+    Returns:
+        - A vector of Pixels with all the information of the segment required.
+    */
+
     vector<Pixel> specificSegment;
     for(int startSegment = pSegment; startSegment < pSegment + pSegmentLimit; startSegment++){
         specificSegment.push_back(pImageOneInfo[pImageRow][startSegment]);
@@ -300,9 +320,9 @@ vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<
         
         for(int imageTwoIndex = 0; imageTwoIndex < pImageTwoTrendsVector.size(); imageTwoIndex++){
 
-            bool compareRedValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed()); 
-            bool compareGreenValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen());
-            bool compareBlueValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue());
+            bool compareRedValue = (10 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed())); 
+            bool compareGreenValue = (10 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen()));
+            bool compareBlueValue = (10 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue()));
             
             if(compareRedValue && compareGreenValue && compareBlueValue){
                 pImageOneTrendsVector[imageOneIndex].setSegmentTrend(pImageTwoTrendsVector[imageTwoIndex]);
@@ -316,6 +336,15 @@ vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<
 }
 
 void printDataStructure(vector<MatchInfo> &pDataStructure){
+    /*
+    Purpose: 
+        - Print all the information in the data structure
+    Parameters: 
+        - A vector with the final data structure
+    Returns:
+        - Nothing, void.
+    */
+
     const size_t dataStructureLenght = pDataStructure.size();
     for(int dataStructureIndex = 0; dataStructureIndex < dataStructureLenght; dataStructureIndex++){
         pDataStructure[dataStructureIndex].printMatchInfo();
@@ -333,16 +362,12 @@ vector<MatchInfo> createDataStructure(){
     Returns:
         - A vector of MatchInfo with all the information of the matched segments.
     */
-
     cout<<"-------System startup-------"<<endl;
     vector<MatchInfo> imageOneTrends = divideLinesBySegments();
-    //printDataStructure(imageOneTrends);
     cout<<"First image uploaded successfully"<<endl;
     vector<Trend> imageTwoTrends = createSecondImageArrayTrend();
-    printDataStructure(imageOneTrends);
     cout<<"Second image uploaded successfully"<<endl;
     vector<MatchInfo> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
     cout<<"Data structure created successfully"<<endl;
-    //printDataStructure(matchedTrends);
     return matchedTrends;
 }
