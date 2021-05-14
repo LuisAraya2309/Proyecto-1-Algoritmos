@@ -86,7 +86,7 @@ void uploadImageTwoInfo(vector<vector<Pixel>> &pImageTwoInfo){
     if(!existsImage(colorImage)){
         exit(1);
     }
-    int rowsImageTwoInfo =0;
+    int rowsImageTwoInfo = 0;
     for (int imageRows = 0; imageRows < colorImage.rows; imageRows+=54){
         for (int imageColumns = 0; imageColumns < colorImage.cols; imageColumns++) {
             redChannel = colorImage.at<Vec3b>(imageRows, imageColumns)[2];
@@ -100,7 +100,7 @@ void uploadImageTwoInfo(vector<vector<Pixel>> &pImageTwoInfo){
     }
 }
 
-void  selectTop3Trends(vector<Pixel> &pPixels,vector<int> &pPixelAppearence,vector<int> &pTrendsPerLine,vector<Pixel> &pAllTrends){
+void  selectTop3Trends(vector<Pixel> &pPixels,vector<int> &pPixelAppearence,vector<int> &pTrendsPerLine,vector<Trend> &pAllTrends, int pRows){
     /*
     Purpose: 
         -Select the top three trends in a line of the second image.
@@ -124,10 +124,10 @@ void  selectTop3Trends(vector<Pixel> &pPixels,vector<int> &pPixelAppearence,vect
         }
         pTrendsPerLine.erase(pTrendsPerLine.begin()+removeElement);
 
-        Pixel topTrend = Pixel();
+        Trend topTrend;
         for(int pixel = 0; pixel< pPixelAppearence.size();pixel++){
             if(pPixelAppearence[pixel] == trendColor){
-                topTrend = pPixels[pixel];
+                topTrend = Trend(pRows,pPixels[pixel]);
                 removeElement = pixel;
                 break;
             }
@@ -155,7 +155,7 @@ int getElementPosition(vector<Pixel> &pixels, Pixel &searchElement){
 
 }
 
-vector<Pixel> createSecondImageArrayTrend(){
+vector<Trend> createSecondImageArrayTrend(){
     /*
     Purpose: 
         -Create an array fulled with the trend colors from each 54 lines of the second image.
@@ -169,7 +169,7 @@ vector<Pixel> createSecondImageArrayTrend(){
 
     vector<vector<Pixel>> imageTwoInfo( rows , vector<Pixel> (columns));
     uploadImageTwoInfo(imageTwoInfo);
-    vector<Pixel> allTrends;
+    vector<Trend> allTrends;
     vector<int> trendsPerLine;
     vector<Pixel> top3TrendsPerLine;
     
@@ -194,7 +194,7 @@ vector<Pixel> createSecondImageArrayTrend(){
             trendsPerLine.push_back(pixelAppearence[countedPixel]);
             
         }
-        selectTop3Trends( pixels, pixelAppearence,trendsPerLine,allTrends);
+        selectTop3Trends( pixels, pixelAppearence,trendsPerLine,allTrends, lines*54);
         trendsPerLine.clear();
     }
     return allTrends;
@@ -275,7 +275,7 @@ vector<MatchInfo> divideLinesBySegments(){
 
     for(int imageRows =0;imageRows<rows;imageRows++){
         for(int segment=0;segment<columns;segment+=segmentLimit){
-            Pixel trendColor = selectSegmentsTrends(imageOneInfo,segment,imageRows, segmentLimit);
+            Trend trendColor = Trend(imageRows*54 , selectSegmentsTrends(imageOneInfo,segment,imageRows, segmentLimit));
             vector<Pixel> specificSegment = returnSpecificSegment(imageOneInfo,segment,imageRows,segmentLimit);
             MatchInfo totalInfo = MatchInfo(trendColor,specificSegment,segment, segment+segmentLimit, imageRows*54);
             imageOneTrends.push_back(totalInfo);
@@ -285,7 +285,7 @@ vector<MatchInfo> divideLinesBySegments(){
     
 }
 
-vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<Pixel> &pImageTwoTrendsVector){
+vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<Trend> &pImageTwoTrendsVector){
     /*
     Purpose: 
         - Analyze the matches between the trends in the first image and the trend sampling in the second image.
@@ -300,9 +300,9 @@ vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<
         
         for(int imageTwoIndex = 0; imageTwoIndex < pImageTwoTrendsVector.size(); imageTwoIndex++){
 
-            bool compareRedValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getRed()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getRed()); 
-            bool compareGreenValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getGreen()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getGreen());
-            bool compareBlueValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getBlue()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getBlue());
+            bool compareRedValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed()); 
+            bool compareGreenValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen());
+            bool compareBlueValue = (-2 <= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue()) && (2 >= pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue());
             
             if(compareRedValue && compareGreenValue && compareBlueValue){
                 pImageOneTrendsVector[imageOneIndex].setSegmentTrend(pImageTwoTrendsVector[imageTwoIndex]);
@@ -337,7 +337,7 @@ vector<MatchInfo> createDataStructure(){
     cout<<"-------System startup-------"<<endl;
     vector<MatchInfo> imageOneTrends = divideLinesBySegments();
     cout<<"First image uploaded successfully"<<endl;
-    vector<Pixel> imageTwoTrends = createSecondImageArrayTrend();
+    vector<Trend> imageTwoTrends = createSecondImageArrayTrend();
     cout<<"Second image uploaded successfully"<<endl;
     vector<MatchInfo> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
     cout<<"Data structure created successfully"<<endl;
