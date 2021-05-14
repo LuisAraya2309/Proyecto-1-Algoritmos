@@ -6,7 +6,7 @@
 #include "Backtracking.h"
 
 int main() {
-    vector<MatchInfo> dataStructureN = createDataStructure();
+   vector<MatchInfo> dataStructureN = createDataStructure();
     cout<<"Size of N: "<<sizeof(dataStructureN);
     return 0;
 }

@@ -2,7 +2,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 #include <unordered_map>
-#include <map>
+#include "MatchInfo.h"
 #include <stdlib.h>
 
 using namespace std;
@@ -14,11 +14,28 @@ using namespace std;
 
 */
 
-int BacktrakingAlgorithm(vector<MatchInfo> pMatchesVector){
-    const size_t pMatchesVectorLenght = pMatchesVector.size();
-    int clippingsFound = 0;
-    for(int pMatchesVectorIndex = 0; pMatchesVectorIndex<pMatchesVectorLenght; pMatchesVectorIndex++){
 
+
+
+int divideAndConquer(vector<MatchInfo> &pDataStructureN){
+
+    vector<MatchInfo> dividedInfo;
+    MatchInfo pivot = pDataStructureN[0];
+    int pivotBegin = pivot.getBegin();
+    int pivotEnd = pivot.getEnd();
+    pDataStructureN.erase(pDataStructureN.begin());
+    for(int actualInfo = 0; actualInfo<pDataStructureN.size();actualInfo++){
+
+        MatchInfo sample = pDataStructureN[actualInfo];
+        int sampleBegin = sample.getBegin();
+        int sampleEnd = sample.getEnd();
+        
+        if(sampleBegin==pivotBegin && sampleEnd==pivotEnd){
+            dividedInfo.push_back(sample);
+        }
+        
     }
-    return clippingsFound;
+    return divideAndConquer() // + Conquer(dividenInfo,);
+
 }
+
