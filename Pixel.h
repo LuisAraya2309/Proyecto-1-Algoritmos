@@ -1,6 +1,3 @@
-#include <iostream>
-
-using namespace std;
 
 class Pixel{
     //Atributes
@@ -22,14 +19,6 @@ class Pixel{
             this->greenValue = pGreenValue;
             this->blueValue = pBlueGreen;
 
-        }
-
-        void printPixel(){
-            cout<<"Red: "<<redValue<<" ,Green: "<<greenValue<<" ,Blue: "<<blueValue<<endl;
-        }
-
-        void printPixelSegment(){
-            cout<<redValue<<","<<greenValue<<","<<blueValue<<"  ";
         }
 
         //Setter
