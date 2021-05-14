@@ -17,6 +17,14 @@ using namespace std;
  
 
 void eraseDuplicatedRowCuts(vector<MatchInfo> &pDividedInfo,  vector<MatchInfo> &pFinalCuts ){
+    /*
+    Purpose:
+        -Erases the cuts that are part of a same cut in the vertical position
+    Paramateres: 
+    A vector of type matchInfo thas has info that needs to be cleaned in vertical position
+    Returns:
+        A MatchInfo vector cleaned from duplicated cuts
+    */
     size_t dividedInfoLenght = pDividedInfo.size();
     int dividedInfoIndex = 0 , indexCompareRows= 1;
     if(pDividedInfo.size()==1){
@@ -39,7 +47,14 @@ void eraseDuplicatedRowCuts(vector<MatchInfo> &pDividedInfo,  vector<MatchInfo> 
 }
 
 vector<MatchInfo> eraseDuplicatedColumnCuts(vector<MatchInfo> &pDividedInfo){
-
+    /*
+    Purpose:
+        -Erases the cuts that are part of a same cut in the horizontal position
+    Paramateres: 
+    A vector of type matchInfo thas has info that needs to be cleaned in horizontal position
+    Returns:
+        A MatchInfo vector cleaned from duplicated cuts
+    */
     cout<<"-----------Lista Entrante-----------"<<endl;
     for(int i = 0; i<pDividedInfo.size(); i++){
         pDividedInfo[i].printMatchInfo();
@@ -80,10 +95,28 @@ vector<MatchInfo> eraseDuplicatedColumnCuts(vector<MatchInfo> &pDividedInfo){
 }
 
 int conquer(vector<MatchInfo> &pFinalCuts){
+    /*
+    Purpose:
+        -Selects a pivot which is going to be always the first element of the dataStructure. Then it begins to divide the data structure by the begin and end  pivot's value. 
+        -It is a recursive function that divides the dataStrucure for each recursion.
+    Paramateres: 
+        -The data structure, a vector with the final cuts that is going to be used in the recursion
+    Returns:
+        -An integer with the amount of the definitive matches.
+    */
     return pFinalCuts.size();
 }
 
-int divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFinalCuts, int &contador){
+int divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFinalCuts){
+     /*
+    Purpose:
+        -Selects a pivot which is going to be always the first element of the dataStructure. Then it begins to divide the data structure by the begin and end  pivot's value. 
+        -It is a recursive function that divides the dataStrucure for each recursion.
+    Paramateres: 
+        -The data structure, a vector with the final cuts that is going to be used in the recursion
+    Returns:
+        -An integer with the amount of the definitive matches.
+    */
 
     if(pDataStructureN.size()<=1){
         return conquer(eraseDuplicatedColumnCuts(pFinalCuts));
@@ -112,6 +145,5 @@ int divideAndConquer(vector<MatchInfo> &pDataStructureN, vector<MatchInfo> &pFin
     //cout<<"Termino la busqueda, crea la lista: "<<endl;
     pDataStructureN = pInfoToEvaluate;
     eraseDuplicatedRowCuts(dividedInfo, pFinalCuts);
-    contador++;
-    return divideAndConquer(pDataStructureN , pFinalCuts, contador) ;
+    return divideAndConquer(pDataStructureN , pFinalCuts) ;
 }

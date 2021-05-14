@@ -13,8 +13,7 @@ int main() {
     cout<<"Size of N: "<<sizeof(dataStructureN)<<endl;
     cout<<endl;
     vector<MatchInfo> finalCuts;
-    int contador = 0;
-    int hola = divideAndConquer(dataStructureN, finalCuts, contador);
+    int hola = divideAndConquer(dataStructureN, finalCuts);
     cout<<"Recortes encontrados por el Divide&Conquer: "<<hola<<endl;
     return 0;
 }
