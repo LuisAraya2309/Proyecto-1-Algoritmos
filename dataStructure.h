@@ -45,7 +45,7 @@ void uploadImageOneInfo(vector<vector<Pixel>> &pImageOneInfo){
         -Nothing. Void
     */
     
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba11.png";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba1.png";
     Mat colorImage = imread(imagePath);
     if(existsImage(colorImage)){
         int blueChannel; int greenChannel; int redChannel;
@@ -80,7 +80,7 @@ void uploadImageTwoInfo(vector<vector<Pixel>> &pImageTwoInfo){
         -Nothing. Void
     */
 
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba12.jpg";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba2.jpg";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage = imread(imagePath);
     if(!existsImage(colorImage)){
@@ -320,9 +320,9 @@ vector<MatchInfo> matchTrends(vector<MatchInfo> &pImageOneTrendsVector , vector<
         
         for(int imageTwoIndex = 0; imageTwoIndex < pImageTwoTrendsVector.size(); imageTwoIndex++){
 
-            bool compareRedValue = (10 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed())); 
-            bool compareGreenValue = (10 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen()));
-            bool compareBlueValue = (10 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue()));
+            bool compareRedValue = (5 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getRed() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getRed())); 
+            bool compareGreenValue = (5 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getGreen() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getGreen()));
+            bool compareBlueValue = (5 >= abs(pImageOneTrendsVector[imageOneIndex].getSegmentTrend().getTrend().getBlue() - pImageTwoTrendsVector[imageTwoIndex].getTrend().getBlue()));
             
             if(compareRedValue && compareGreenValue && compareBlueValue){
                 pImageOneTrendsVector[imageOneIndex].setSegmentTrend(pImageTwoTrendsVector[imageTwoIndex]);
