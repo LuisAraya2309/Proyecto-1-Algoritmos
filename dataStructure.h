@@ -45,7 +45,7 @@ void uploadImageOneInfo(vector<vector<Pixel>> &pImageOneInfo){
         -Nothing. Void
     */
     
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba1.png";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba4.png";
     Mat colorImage = imread(imagePath);
     if(existsImage(colorImage)){
         int blueChannel; int greenChannel; int redChannel;
@@ -80,7 +80,7 @@ void uploadImageTwoInfo(vector<vector<Pixel>> &pImageTwoInfo){
         -Nothing. Void
     */
 
-    string imagePath = "C:/Users/Sebastian/Pictures/Prueba2.jpg";
+    string imagePath = "C:/Users/luist/OneDrive/Escritorio/Proyecto1/Prueba5.png";
     int blueChannel; int greenChannel; int redChannel;
     Mat colorImage = imread(imagePath);
     if(!existsImage(colorImage)){
@@ -341,6 +341,6 @@ vector<MatchInfo> createDataStructure(){
     cout<<"Second image uploaded successfully"<<endl;
     vector<MatchInfo> matchedTrends = matchTrends(imageOneTrends, imageTwoTrends);
     cout<<"Data structure created successfully"<<endl;
-    printDataStructure(matchedTrends);
+    //printDataStructure(matchedTrends);
     return matchedTrends;
 }
